@@ -1,23 +1,22 @@
 import "./App.css";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import WinningPositions from "./WinningPositions.js";
 
 function App() {
-  const [player1, setPlayer1] = useState({ name: "Player 1 ", figure: "" });
-  const [player2, setPlayer2] = useState({ name: "Player 2", figure: "" });
-  const [activePlayer, setActivePlayer] = useState(player1);
-  const [isFigureChosen, setIsFigureChosen] = useState(false);
-  const [activeFigure, setActiveFigure] = useState(player1.figure);
+  const [player1, setPlayer1] = useState({ id: 1, name: "Player 1", figure: "" });
+  const [player2, setPlayer2] = useState({ id: 2, name: "Player 2", figure: "" });
+  const [activePlayerId, setActivePlayerId] = useState(1);
+
   const [fieldsValues, setFieldsValues] = useState([
-    { nr: "1", value: "" },
-    { nr: "2", value: "" },
-    { nr: "3", value: "" },
-    { nr: "4", value: "" },
-    { nr: "5", value: "" },
-    { nr: "6", value: "" },
-    { nr: "7", value: "" },
-    { nr: "8", value: "" },
-    { nr: "9", value: "" },
+    { nr: 1, value: "" },
+    { nr: 2, value: "" },
+    { nr: 3, value: "" },
+    { nr: 4, value: "" },
+    { nr: 5, value: "" },
+    { nr: 6, value: "" },
+    { nr: 7, value: "" },
+    { nr: 8, value: "" },
+    { nr: 9, value: "" },
   ]);
   const [isWinner, setIsWinner] = useState(false);
 
@@ -26,19 +25,15 @@ function App() {
   const handleFigureChoice = (figure) => {
     setPlayer1({
       ...player1,
-      figure: figure,
+      figure: figure
     });
-    figure === "●"
-      ? setPlayer2({
-          ...player2,
-          figure: "❌",
-        })
-      : setPlayer2({
-          ...player2,
-          figure: "●",
-        });
-    setIsFigureChosen(true);
-    setActiveFigure(figure);
+
+    setPlayer2({
+      ...player2,
+      figure:  figure === "●" ? "❌" : "●",
+    });
+
+    setActivePlayerId(1);
   };
   // Insert a figure of activePlayer
   // and change activePlayer
@@ -54,15 +49,27 @@ function App() {
       return fieldValue;
     });
     setFieldsValues(newList);
-    setActivePlayer((prev) => (prev === player1 ? player2 : player1));
-    setActiveFigure((prev) => (prev === "❌" ? "●" : "❌"));
+
+    setActivePlayerId((prev) => (prev === 1 ? 2 : 1));
   };
+
+  const isFigureChosen = useMemo(() => {
+    return player1.figure !== '' && player2.figure !== '';
+  }, [player1.figure, player2.figure ]);
+
+  const activePlayerName = useMemo(() => {
+    return activePlayerId === 1 ? player1.name : player2.name;
+  }, [activePlayerId, player1.name, player2.name]);
+
+  const activeFigure = useMemo(() => {
+    return activePlayerId === 1 ? player1.figure : player2.figure;
+  }, [activePlayerId, player1.figure, player2.figure]);
 
   return (
     <div className="App-header">
       <WinningPositions fieldsValues={fieldsValues} />
       <div className="active-player">
-        {activePlayer.name}
+        {activePlayerName}
         {activeFigure}
       </div>
       {/* Choose the figure */}
@@ -83,8 +90,8 @@ function App() {
         {fieldsValues.map((fieldValue, index) => (
           <div
             onClick={() => handleFigureInsertion(fieldValue)}
-            className="one-field 1"
-            key="index"
+            className="one-field"
+            key={fieldValue.nr}
           >
             <div className="field-value">{fieldValue.value}</div>
           </div>
